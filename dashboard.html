@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Group Admin Dashboard</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: var(--tg-theme-bg-color, #121824);
+            --card-bg: var(--tg-theme-secondary-bg-color, #1c2436);
+            --text-color: var(--tg-theme-text-color, #ffffff);
+            --hint-color: var(--tg-theme-hint-color, #8a99ad);
+            --btn-color: var(--tg-theme-button-color, #2481cc);
+            --btn-text: var(--tg-theme-button-text-color, #ffffff);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h2 { margin: 0 0 4px 0; font-size: 20px; }
+        .header p { margin: 0; font-size: 13px; color: var(--hint-color); }
+        .section-title {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--btn-color);
+            margin: 16px 4px 8px 4px;
+            font-weight: bold;
+        }
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 4px 14px;
+            margin-bottom: 12px;
+        }
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .item:last-child { border-bottom: none; }
+        .item-text h4 { margin: 0; font-size: 15px; font-weight: 500; }
+        .item-text p { margin: 2px 0 0 0; font-size: 12px; color: var(--hint-color); }
+        
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider-toggle {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #3b465a;
+            transition: .25s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 24px;
+        }
+        .slider-toggle:before {
+            position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .25s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 50%;
+        }
+        input:checked + .slider-toggle { background-color: #2ea043; }
+        input:checked + .slider-toggle:before { transform: translateX(20px); }
+
+        /* Range Slider */
+        .range-container {
+            padding: 10px 0;
+        }
+        .range-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+        .range-slider {
+            width: 100%;
+            height: 6px;
+            background: #3b465a;
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--btn-color);
+            cursor: pointer;
+        }
+
+        .save-btn {
+            position: sticky;
+            bottom: 12px;
+            width: 100%;
+            background-color: var(--btn-color);
+            color: var(--btn-text);
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2 id="chat_title">Group Dashboard</h2>
+        <p id="chat_id_display">ID: Loading...</p>
+    </div>
+
+    <div class="section-title">🛡️ Security Settings</div>
+    <div class="card">
+        <div class="item">
+            <div class="item-text">
+                <h4>AI Spam Scanner</h4>
+                <p>Detect scam and promotional text</p>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="enable_spamscan">
+                <span class="slider-toggle"></span>
+            </label>
+        </div>
+        <div class="item">
+            <div class="item-text">
+                <h4>Block Channel Forwards</h4>
+                <p>Delete forwarded channel posts</p>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="block_channel_forwards">
+                <span class="slider-toggle"></span>
+            </label>
+        </div>
+        <div class="item">
+            <div class="item-text">
+                <h4>Mute on Link</h4>
+                <p>Mute users who send links for 24h</p>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="mute_on_link">
+                <span class="slider-toggle"></span>
+            </label>
+        </div>
+        <div class="item">
+            <div class="item-text">
+                <h4>Anti Duplicate Spam</h4>
+                <p>Block same message repetition</p>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="anti_duplicate">
+                <span class="slider-toggle"></span>
+            </label>
+        </div>
+        <div class="item">
+            <div class="item-text">
+                <h4>OCR Image Scanner</h4>
+                <p>Scan text inside images for links</p>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="enable_ocr_scan">
+                <span class="slider-toggle"></span>
+            </label>
+        </div>
+        <div class="item">
+            <div class="item-text">
+                <h4>Silent Mode</h4>
+                <p>Delete silently without warning text</p>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="silent_mode">
+                <span class="slider-toggle"></span>
+            </label>
+        </div>
+    </div>
+
+    <div class="section-title">⚙️ Auto Restrictions</div>
+    <div class="card">
+        <div class="range-container">
+            <div class="range-header">
+                <span>⏱ Auto Delete Media</span>
+                <b id="autodel_val">0s (OFF)</b>
+            </div>
+            <input type="range" min="0" max="180" step="10" value="0" class="range-slider" id="auto_delete_seconds">
+        </div>
+        <div class="range-container">
+            <div class="range-header">
+                <span>📏 Max Message Length</span>
+                <b id="maxlen_val">0 (OFF)</b>
+            </div>
+            <input type="range" min="0" max="1000" step="50" value="0" class="range-slider" id="max_message_length">
+        </div>
+    </div>
+
+    <button class="save-btn" id="save_btn" onclick="saveSettings()">💾 Save Settings</button>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const chatId = urlParams.get('chat_id');
+        document.getElementById('chat_id_display').innerText = "Target Chat ID: " + chatId;
+
+        // Sliders Real-time display update
+        const autodelSlider = document.getElementById('auto_delete_seconds');
+        const autodelVal = document.getElementById('autodel_val');
+        autodelSlider.oninput = () => {
+            autodelVal.innerText = autodelSlider.value == 0 ? "OFF" : autodelSlider.value + "s";
+        };
+
+        const maxlenSlider = document.getElementById('max_message_length');
+        const maxlenVal = document.getElementById('maxlen_val');
+        maxlenSlider.oninput = () => {
+            maxlenVal.innerText = maxlenSlider.value == 0 ? "OFF" : maxlenSlider.value + " chars";
+        };
+
+        // Load Settings on start
+        async function loadSettings() {
+            try {
+                const res = await fetch(`/api/get_settings?chat_id=${chatId}&init_data=${encodeURIComponent(tg.initData)}`);
+                const data = await res.json();
+                if (data.status === "ok") {
+                    const s = data.settings;
+                    document.getElementById('enable_spamscan').checked = s.enable_spamscan || false;
+                    document.getElementById('block_channel_forwards').checked = s.block_channel_forwards || false;
+                    document.getElementById('mute_on_link').checked = s.mute_on_link || false;
+                    document.getElementById('anti_duplicate').checked = s.anti_duplicate || false;
+                    document.getElementById('enable_ocr_scan').checked = s.enable_ocr_scan || false;
+                    document.getElementById('silent_mode').checked = s.silent_mode || false;
+                    
+                    autodelSlider.value = s.auto_delete_seconds || 0;
+                    autodelVal.innerText = autodelSlider.value == 0 ? "OFF" : autodelSlider.value + "s";
+                    
+                    maxlenSlider.value = s.max_message_length || 0;
+                    maxlenVal.innerText = maxlenSlider.value == 0 ? "OFF" : maxlenSlider.value + " chars";
+                }
+            } catch (err) {
+                console.error("Failed to load settings", err);
+            }
+        }
+
+        async function saveSettings() {
+            const btn = document.getElementById('save_btn');
+            btn.innerText = "⏳ Saving...";
+            btn.disabled = true;
+
+            const payload = {
+                chat_id: parseInt(chatId),
+                init_data: tg.initData,
+                settings: {
+                    enable_spamscan: document.getElementById('enable_spamscan').checked,
+                    block_channel_forwards: document.getElementById('block_channel_forwards').checked,
+                    mute_on_link: document.getElementById('mute_on_link').checked,
+                    anti_duplicate: document.getElementById('anti_duplicate').checked,
+                    enable_ocr_scan: document.getElementById('enable_ocr_scan').checked,
+                    silent_mode: document.getElementById('silent_mode').checked,
+                    auto_delete_seconds: parseInt(autodelSlider.value),
+                    max_message_length: parseInt(maxlenSlider.value)
+                }
+            };
+
+            try {
+                const res = await fetch('/api/save_settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const resData = await res.json();
+                if (resData.status === "ok") {
+                    tg.showPopup({ title: "Success", message: "✅ Settings saved successfully!" }, () => {
+                        tg.close();
+                    });
+                } else {
+                    tg.showAlert("❌ Error: " + (resData.message || "Failed to save"));
+                }
+            } catch (e) {
+                tg.showAlert("❌ Network error: " + e.message);
+            } finally {
+                btn.innerText = "💾 Save Settings";
+                btn.disabled = false;
+            }
+        }
+
+        loadSettings();
+    </script>
+</body>
+</html>
